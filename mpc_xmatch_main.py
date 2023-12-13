@@ -17,6 +17,7 @@ import socket
 import subprocess
 import sys
 import time
+from slurm_funcs import *
 
 #-----------------------------------------------------------------------------
 # Functions
@@ -35,7 +36,7 @@ def makedir(dir):
         os.mkdir(dir)
 
 
-def write_jscript(job_name,partition,cmd,outdir):
+def write_jscript_old(job_name,partition,cmd,outdir):
     '''writes a SLURM job script to "job_name.sh"
     Arguments:
     ----------
@@ -72,7 +73,7 @@ def write_jscript(job_name,partition,cmd,outdir):
         fh.writelines("conda deactivate")
     return job_file
 
-def sacct_cmd(job_name,outputs,c=False,m=False):
+def sacct_cmd_old(job_name,outputs,c=False,m=False):
     '''parses the output of a sacct command, returning specified information
     Arguments:
     ----------
@@ -219,7 +220,8 @@ if __name__ == "__main__":
                 jname = 'mpc_xmatch_'+str(t0)+'_'+str(jcount)
                 jstr['jobname'][jsub] = jname
                 # write job script to file
-                jfile=write_jscript(jname,prt,cmd,outfiledir)
+                jfile = write_jscript(jname,jcount,prt,cmd,outfiledir,"katiefasbender@montana.edu",cpupt=4,mempc="9000",rtime="01:00:00",parallel=False)
+                #jfile=write_jscript(jname,prt,cmd,outfiledir)
                 # submit job to slurm queue
                 os.system("sbatch "+jfile)
                 jstr['submitted'][jsub] = True

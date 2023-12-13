@@ -101,6 +101,8 @@ if __name__=="__main__":
     print("pulling CANFind tracklet measurements from ",cf_file)
     cf_mmts = Table.read(cf_file)
     cf_mmts['matched_mpc_mmt'] = Column(length=len(cf_mmts),dtype="U92")
+    cf_mmts['mpc_mode'] = Column(length=len(cf_mmts),dtype="U3")
+    cf_mmts['match_flag'] = Column(np.repeat(False,len(cf_mmts)))
     cf_mjds = Time(cf_mmts['mjd'],format="mjd",scale="utc")
     cf_coords = SkyCoord(ra=cf_mmts['ra'],dec=cf_mmts['dec'],frame="icrs",unit="degree",obstime=cf_mjds)
 
@@ -115,9 +117,11 @@ if __name__=="__main__":
     print(len(np.unique(mpc_mmts[idx_mpc[good_matches]]['name']))," date-validated tracklet matches from MPC file")
     print(len(np.unique(cf_mmts[idx_cf[good_matches]]['tracklet_id']))," date-validated tracklet matches from NSC")
     # write out the CANFind mmts with any matched MPC mmts as new column
+    cf_mmts['mpc_mode'][idx_cf[good_matches]] = mpc_mmts['mpc_mode'][idx_mpc[good_matches]]
     cf_mmts['matched_mpc_mmt'][idx_cf[good_matches]] = mpc_mmts['line'][idx_mpc[good_matches]]
+    cf_mmts['match_flag'][idx_cf[good_matches]] = True
     cf_mmts.write(cf_file,overwrite=True)
+    print("CANFind mmts & matches written to ",cf_file)
 #    mpc_mmts['matched_cf_measid'][idx_mpc[good_matches]] = cf_mmts['measid'][idx_cf[good_matches]]
 #    mpc_mmts.write(mpc_file,overwrite=True)
-    print("CANFind mmts & matches written to ",cf_file)
 #    print("MPC mmts & matches written to ",mpc_file)
