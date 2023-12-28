@@ -9,6 +9,7 @@
 #     (a) Numbered Observations file "NumObs.txt.gz"
 #     (b) Unnumbered Observations file "UnnObs.txt.gz"
 #     (c) Isolated Tracklet File "itf.txt.gz"
+#     (d) Minor Planet Center Orbit database "MPCORB.DAT.gz" - https://minorplanetcenter.net/iau/MPCORB.html
 # and will write them out to the correct HEALPix (NSIDE=RING32)
 # file, with labeling as to which MPC file the mmts came from.
 
@@ -159,10 +160,13 @@ if __name__=="__main__":
     # --Set up inputs, out table, filenames, etc.--
     # ---------------------------------------------
     # output table (cat)
-    mpc_mmts=Table(names=("mjd","ra","dec","mag_augo","filter","obscode","name","line"),
-                  dtype=["float64","float64","float64","float64","U1","U3","U13","U90"])
+    if mode=="orb":
+        mpc_mmts=Table(names=
+    else:
+        mpc_mmts=Table(names=("mjd","ra","dec","mag_augo","filter","obscode","name","line"),
+                      dtype=["float64","float64","float64","float64","U1","U3","U13","U90"])
     # inputs
-    mode = sys.argv[1]     # num for NumOBs.txt.gz, unn for UnnObs.txt.gz, or itf for itf.txt.gz
+    mode = sys.argv[1]     # num for NumOBs.txt.gz, unn for UnnObs.txt.gz, itf for itf.txt.gz, orb for MPCORB.DAT.gz
     filename = sys.argv[2] # some split filename x<X><X> where the X's are two lowercase letters
     # repos & files
     basedir = "/home/x25h971/catalogs/"
@@ -178,7 +182,8 @@ if __name__=="__main__":
     print("Opening MPC split mode ",mode,", file ",listdir+filename)
     for line in w:
         #row = read_mpc80_line(line.decode(),mode=mode)
-        row = read_mpc80_line(line,mode=mode)
+        if mode=="orb": row = read_mpc80_line(line))
+        else: row = read_mpc80_line(line,mode=mode)
         if row!="satellite!":
             if row[0]!=-9999:
                 mpc_mmts.add_row(row)

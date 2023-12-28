@@ -214,13 +214,13 @@ if __name__ == "__main__":
                 jsub = np.sort(unsub)[0]
                 # info of next job to submit
                 r32 = jstr['ring32'][jsub]
-                cmd = "python "+localdir+"mpc_xmatch.py "+str(r32)
+                cmd = "python "+localdir+"mpc_xmatch/mpc_xmatch.py "+str(r32)
                 prt = jstr['partition'][jsub].split("_")[0]
                 jstr['cmd'][jsub] = cmd
                 jname = 'mpc_xmatch_'+str(t0)+'_'+str(jcount)
                 jstr['jobname'][jsub] = jname
                 # write job script to file
-                jfile = write_jscript(jname,jcount,prt,cmd,outfiledir,"katiefasbender@montana.edu",cpupt=4,mempc="9000",rtime="01:00:00",parallel=False)
+                jfile = write_jscript(jname,jcount,prt,[cmd],outfiledir,"katiefasbender@montana.edu",cpupt=4,mempc="9000",rtime="01:00:00",parallel=False)
                 #jfile=write_jscript(jname,prt,cmd,outfiledir)
                 # submit job to slurm queue
                 os.system("sbatch "+jfile)
