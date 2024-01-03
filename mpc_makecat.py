@@ -159,12 +159,6 @@ if __name__=="__main__":
 
     # --Set up inputs, out table, filenames, etc.--
     # ---------------------------------------------
-    # output table (cat)
-    if mode=="orb":
-        mpc_mmts=Table(names=
-    else:
-        mpc_mmts=Table(names=("mjd","ra","dec","mag_augo","filter","obscode","name","line"),
-                      dtype=["float64","float64","float64","float64","U1","U3","U13","U90"])
     # inputs
     mode = sys.argv[1]     # num for NumOBs.txt.gz, unn for UnnObs.txt.gz, itf for itf.txt.gz, orb for MPCORB.DAT.gz
     filename = sys.argv[2] # some split filename x<X><X> where the X's are two lowercase letters
@@ -172,8 +166,13 @@ if __name__=="__main__":
     basedir = "/home/x25h971/catalogs/"
     localdir = basedir+"files/"
     listdir = basedir+"mpc/"+str(mode)+"/"
-    outdir = basedir+"mpc/ring32/"
+    else: outdir = basedir+"mpc/ring32/"
     print("Mode ",mode)
+
+    # output table (cat)
+    mpc_mmts=Table(names=("mjd","ra","dec","mag_augo","filter","obscode","name","line"),
+                      dtype=["float64","float64","float64","float64","U1","U3","U13","U90"])
+
 
     # --Read in MPC file --
     # ---------------------
