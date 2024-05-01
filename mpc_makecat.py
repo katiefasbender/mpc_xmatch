@@ -166,7 +166,7 @@ if __name__=="__main__":
     basedir = "/home/x25h971/catalogs/"
     localdir = basedir+"files/"
     listdir = basedir+"mpc/"+str(mode)+"/"
-    else: outdir = basedir+"mpc/ring32/"
+    outdir = basedir+"mpc/ring32/"
     print("Mode ",mode)
 
     # output table (cat)
@@ -181,7 +181,7 @@ if __name__=="__main__":
     print("Opening MPC split mode ",mode,", file ",listdir+filename)
     for line in w:
         #row = read_mpc80_line(line.decode(),mode=mode)
-        if mode=="orb": row = read_mpc80_line(line))
+        if mode=="orb": row = read_mpc80_line(line)
         else: row = read_mpc80_line(line,mode=mode)
         if row!="satellite!":
             if row[0]!=-9999:

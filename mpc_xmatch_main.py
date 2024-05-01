@@ -118,6 +118,7 @@ if __name__ == "__main__":
     # Initiate input arguments
     parser = ArgumentParser(description='Create a ring32-sorted catalog of MPC measurements')
     parser.add_argument('--ring32s',type=str,nargs=1,default="/home/x25h971/catalogs/canfind_dr2/files/uniquering32.fits.gz",help='list of ring32 canfind HEALPix to xmatch')
+    parser.add_argument('--list',type=str,nargs=1,default="None",help='list of canfind mmts to xmatch, if you want to only check a few')
     parser.add_argument('--njobs',type=int,nargs=1,default=1,help='Number of jobs to maintain across all partitions')
     parser.add_argument('--partitions',type=str,nargs=1,help='Comma-delimited list of slurm partitions')
     args = parser.parse_args()
@@ -128,6 +129,8 @@ if __name__ == "__main__":
     # Input
     r32list = args.ring32s[0]
     ring32s = Table.read(r32list)
+    listname = args.list[0]
+    if listname!="None": list_exists = True
     njobs = int(args.njobs[0])
     partitions = args.partitions[0].split(',')  # the slurm partitions to submit jobs to
     npar = len(partitions)                     # number of slurm partitions
@@ -214,7 +217,9 @@ if __name__ == "__main__":
                 jsub = np.sort(unsub)[0]
                 # info of next job to submit
                 r32 = jstr['ring32'][jsub]
-                cmd = "python "+localdir+"mpc_xmatch/mpc_xmatch.py "+str(r32)
+                lst=""
+                if list_exists: lst = " "+listname
+                cmd = "python "+localdir+"mpc_xmatch/mpc_xmatch.py "+str(r32)+lst
                 prt = jstr['partition'][jsub].split("_")[0]
                 jstr['cmd'][jsub] = cmd
                 jname = 'mpc_xmatch_'+str(t0)+'_'+str(jcount)

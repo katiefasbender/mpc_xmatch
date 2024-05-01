@@ -76,21 +76,29 @@ if __name__=="__main__":
     #              dtype=["float64","float64","float64","float64","U1","U3","U13","U90"])
     # inputs
     ring32 = int(sys.argv[1]) # ring32 HEALPix
+    list_exists = False # option to only select mmts from a list
+    if len(sys.argv)>2:
+        list_exists = True
+        listname = sys.argv[2]
     # repos & files
     basedir = "/home/x25h971/catalogs/" # for MSU tempest
     localdir = basedir+"files/"
     mpcdir = basedir+"mpc/ring32/"      # where the MPC observations catalog is stored
     cfdir = basedir+"canfind/dr2/ring32/"   # where CANFind NSC mmts are stored
+    if list_exists: list = Table.read(listname)
 
     # --Read in MPC file --
     # ---------------------
     mpc_mmts = Table()
     mpc_file = mpcdir+str(ring32//1000)+"/"+str(ring32)+"_*.fits"
+    print("mpcfile = ",mpc_file)
     mpc_files = subprocess.getoutput("ls -ltr "+mpc_file).split("\n")
     print("pulling MPC mmts from ",len(mpc_files)," ring32=",str(ring32)," MPC files")
     for mpcfl in mpc_files:
         mpcf = mpcfl.split(" ")[-1]
-        mpc_mmts = vstack([mpc_mmts,Table.read(mpcf)])
+        if mpcf !="directory":
+            mtab = Table.read(mpcf)
+            mpc_mmts = vstack([mpc_mmts,mtab])
     mpc_mjds = Time(mpc_mmts['mjd'],format='mjd',scale='utc')
     mpc_coords = SkyCoord(ra=mpc_mmts['ra'],dec=mpc_mmts['dec'],frame="icrs",unit="degree",obstime=mpc_mjds)
 
@@ -98,8 +106,12 @@ if __name__=="__main__":
     #------------------------------
     # use mpc coords to get ring32 values
     cf_file = cfdir+str(ring32//1000)+"/"+str(ring32)+".fits.gz"
+    cf_file_adjust = cf_file.split(".fits.gz")[0]+"recheck.fits.gz"
     print("pulling CANFind tracklet measurements from ",cf_file)
     cf_mmts = Table.read(cf_file)
+    if list_exists:
+        cfbool = np.isin(list['measid'],cf_mmts['measid'])
+        cf_mmts = cf_mmts[cfbool]
     cf_mmts['matched_mpc_mmt'] = Column(length=len(cf_mmts),dtype="U92")
     cf_mmts['mpc_mode'] = Column(length=len(cf_mmts),dtype="U3")
     cf_mmts['match_flag'] = Column(np.repeat(False,len(cf_mmts)))
@@ -120,8 +132,8 @@ if __name__=="__main__":
     cf_mmts['mpc_mode'][idx_cf[good_matches]] = mpc_mmts['mpc_mode'][idx_mpc[good_matches]]
     cf_mmts['matched_mpc_mmt'][idx_cf[good_matches]] = mpc_mmts['line'][idx_mpc[good_matches]]
     cf_mmts['match_flag'][idx_cf[good_matches]] = True
-    cf_mmts.write(cf_file,overwrite=True)
-    print("CANFind mmts & matches written to ",cf_file)
+    cf_mmts.write(cf_file_adjust,overwrite=True)
+    print("CANFind mmts & matches written to ",cf_file_adjust)
 #    mpc_mmts['matched_cf_measid'][idx_mpc[good_matches]] = cf_mmts['measid'][idx_cf[good_matches]]
 #    mpc_mmts.write(mpc_file,overwrite=True)
 #    print("MPC mmts & matches written to ",mpc_file)
